@@ -1,6 +1,5 @@
 using Random
 
-
 # ==================================================================================================
 
 mutable struct Instance
@@ -63,8 +62,8 @@ end
 # ==================================================================================================
 
 mutable struct Solution
-    π :: Array{Int64,1} ## solução: uma permutação de cidades
-    v :: Float64        ## valor da solução: distância total
+    π :: Array{Int64,1}
+    v :: Float64     
     Solution(s::Solution) = new(copy(s.π),s.v)
     Solution(π,v) = new(copy(π),v)
 end
@@ -79,7 +78,6 @@ function nearestNeighbor(I::Instance)
     for k=2:I.n
       f=findall(free)
       j=f[findmin(I.D[s.π[end],f])[2]]
-    #       s.v += I.D[s.π[end],j]
       push!(s.π,j)
       free[j]=false
     end
@@ -88,7 +86,6 @@ function nearestNeighbor(I::Instance)
             s.v += I.D[s.π[i],s.π[((i+lookahead-1)%(I.n))+1]]
         end
     end
-#     push!(s.π,1)
     s
 end
 
@@ -102,43 +99,14 @@ function randomNearestNeighbor(I::Instance,k)
         f=findall(free)
         ncand=min(k,I.n-i+1)
         j=f[sortperm(I.D[s.π[end],f])[rand(1:ncand)]]
-    #          s.v += I.D[s.π[end],j]
         push!(s.π,j)
         free[j]=false
     end
     for lookahead=1:I.l
         for i=1:I.n
-#             println("$(s.π[i]) - $(s.π[((i+lookahead-1)%(I.n))+1])")
-#             println("$(I.D[i,((i+lookahead-1)%(I.n))+1])")
             s.v += I.D[s.π[i],s.π[((i+lookahead-1)%(I.n))+1]]
         end
     end
-#     push!(s.π,1)
-    s
-end
-
-# ==================================================================================================
-
-function randomNearestNeighbor(I::Instance,k)
-    s = Solution([1],0.0)
-    free=trues(I.n)
-    free[1]=false
-    for i=2:I.n
-        f=findall(free)
-        ncand=min(k,I.n-i+1)
-        j=f[sortperm(I.D[s.π[end],f])[rand(1:ncand)]]
-    #          s.v += I.D[s.π[end],j]
-        push!(s.π,j)
-        free[j]=false
-    end
-    for lookahead=1:I.l
-        for i=1:I.n
-#             println("$(s.π[i]) - $(s.π[((i+lookahead-1)%(I.n))+1])")
-#             println("$(I.D[i,((i+lookahead-1)%(I.n))+1])")
-            s.v += I.D[s.π[i],s.π[((i+lookahead-1)%(I.n))+1]]
-        end
-    end
-#     push!(s.π,1)
     s
 end
 
@@ -154,7 +122,7 @@ function calcIndex(index, n)
     result
 end
 
-function localSearchAdjacentCitiesSwap(I::Instance, s₀::Solution)
+function localSearchAdjacentNodesSwap(I::Instance, s₀::Solution)
     s = copy(s₀)
     i=1
     v=0.0
@@ -204,9 +172,7 @@ end
 
 # ==================================================================================================
 
-# <instance input file>??
 function main(args) ## args: <output file> <k> <# iterations> <seed>
-#     inputFile = args[1]
     outputFile = args[1]
     k = parse(Int64, args[2])
     nIterations = parse(Int64, args[3])
@@ -224,11 +190,11 @@ function main(args) ## args: <output file> <k> <# iterations> <seed>
     
     
     timeProgram = @elapsed begin
-        writeInEndOfFile("Local Search Adjacent Cities Swap\n", outputFile)
+        writeInEndOfFile("Local Search Adjacent Nodes Swap\n", outputFile)
         for i = 1:nIterations
             timeIteration = @elapsed begin
                 s = randomNearestNeighbor(I,k) 
-                s = localSearchAdjacentCitiesSwap(I,s)
+                s = localSearchAdjacentNodesSwap(I,s)
                 if s.v < b.v
                     b = copy(s)
                 end
